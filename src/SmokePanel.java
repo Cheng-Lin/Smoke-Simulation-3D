@@ -1,8 +1,3 @@
-
-/**
- *
- */
-
 import java.awt.BorderLayout;
 import java.awt.GraphicsConfiguration;
 
@@ -18,10 +13,6 @@ import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickTool;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
-/**
- * @author Kaito
- *
- */
 public class SmokePanel extends JPanel
 {
     Starter s;

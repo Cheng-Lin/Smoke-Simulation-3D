@@ -1,11 +1,3 @@
-/**
- *
- */
-
-/**
- * @author Kaito
- *
- */
 public class FluidSolver3D
 {
     int size, bSize;
@@ -94,18 +86,30 @@ public class FluidSolver3D
 
         // sum all temperatures
         for (int i = 1; i <= this.size; i++)
+        {
             for (int j = 1; j <= this.size; j++)
+            {
                 for (int k = 1; k <= this.size; k++)
+                {
                     Tamb += this.d[i][j][k];
+                }
+            }
+        }
 
         // get average temperature
         Tamb /= (this.size * this.size * this.size);
 
         // for each cell compute buoyancy force
         for (int i = 1; i <= this.size; i++)
+        {
             for (int j = 1; j <= this.size; j++)
+            {
                 for (int k = 1; k <= this.size; k++)
+                {
                     Fbuoy[i][j][k] = a * this.d[i][j][k] + -b * (this.d[i][j][k] - Tamb);
+                }
+            }
+        }
     }
 
     /**
@@ -154,9 +158,15 @@ public class FluidSolver3D
 
         // Calculate magnitude of curl(u,v,w) for each cell. (|w|)
         for (int x = 1; x <= this.size; x++)
+        {
             for (int y = 1; y <= this.size; y++)
+            {
                 for (int z = 1; z <= this.size; z++)
+                {
                     this.curl[x][y][z] = this.curl(x, y, z);
+                }
+            }
+        }
 
         for (int x = 2; x < this.size; x++)
         {
@@ -181,15 +191,9 @@ public class FluidSolver3D
                     v = this.curl(x, y, z);
 
                     // N x w
-                    Fvc_x[x][y][z] = (dw_dy * this.k - dw_dz * this.j) * epsilon; // a2b3
-                                                                                  // -
-                                                                                  // a3b2
-                    Fvc_y[x][y][z] = -(dw_dx * this.k - dw_dz * this.i) * epsilon; // a3b1
-                                                                                   // -
-                                                                                   // a1b3
-                    Fvc_z[x][y][z] = (dw_dx * this.j - dw_dy * this.i) * epsilon; // a1b2
-                                                                                  // -
-                                                                                  // a2b1
+                    Fvc_x[x][y][z] = (dw_dy * this.k - dw_dz * this.j) * epsilon; // a2b3 - a3b2
+                    Fvc_y[x][y][z] = -(dw_dx * this.k - dw_dz * this.i) * epsilon; // a3b1 - a1b3
+                    Fvc_z[x][y][z] = (dw_dx * this.j - dw_dy * this.i) * epsilon; // a1b2 - a2b1
                 }
             }
         }
@@ -273,17 +277,29 @@ public class FluidSolver3D
 
         // clear input density array for next frame
         for (int x = 0; x < this.bSize; x++)
+        {
             for (int y = 0; y < this.bSize; y++)
+            {
                 for (int z = 0; z < this.bSize; z++)
+                {
                     this.dOld[x][y][z] = 0;
+                }
+            }
+        }
     }
 
     private void addSource(final float[][][] x, final float[][][] x0)
     {
         for (int i = 0; i < this.bSize; i++)
+        {
             for (int j = 0; j < this.bSize; j++)
+            {
                 for (int k = 0; k < this.bSize; k++)
+                {
                     x[i][j][k] += this.dt * x0[i][j][k];
+                }
+            }
+        }
     }
 
     /**
@@ -326,20 +342,38 @@ public class FluidSolver3D
                     z = k - dt0 * dw[i][j][k];
 
                     // interpolate results
-                    if (x > this.size + 0.5) x = this.size + 0.5f;
-                    if (x < 0.5) x = 0.5f;
+                    if (x > this.size + 0.5)
+                    {
+                        x = this.size + 0.5f;
+                    }
+                    if (x < 0.5)
+                    {
+                        x = 0.5f;
+                    }
 
                     i0 = (int)x;
                     i1 = i0 + 1;
 
-                    if (y > this.size + 0.5) y = this.size + 0.5f;
-                    if (y < 0.5) y = 0.5f;
+                    if (y > this.size + 0.5)
+                    {
+                        y = this.size + 0.5f;
+                    }
+                    if (y < 0.5)
+                    {
+                        y = 0.5f;
+                    }
 
                     j0 = (int)y;
                     j1 = j0 + 1;
 
-                    if (z > this.size + 0.5) z = this.size + 0.5f;
-                    if (z < 0.5) z = 0.5f;
+                    if (z > this.size + 0.5)
+                    {
+                        z = this.size + 0.5f;
+                    }
+                    if (z < 0.5)
+                    {
+                        z = 0.5f;
+                    }
 
                     k0 = (int)z;
                     k1 = k0 + 1;
@@ -526,27 +560,12 @@ public class FluidSolver3D
             }
         }
 
-        // check the border frame
-        for (int i = 1; i <= this.size; i++)
-        {
-            x[i][0][0] = (x[i][1][0] + x[i][0][1]) / 2.0f;
-            x[i][this.size + 1][0] = (x[i][this.size][0] + x[i][this.size + 1][1]) / 2.0f;
-            x[i][0][this.size + 1] = (x[i][1][this.size + 1] + x[i][0][this.size]) / 2.0f;
-            x[i][this.size + 1][this.size + 1] = (x[i][this.size][this.size + 1] + x[i][this.size + 1][this.size])
-                    / 2.0f;
-            x[0][i][0] = (x[1][i][0] + x[0][i][1]) / 2.0f;
-            x[this.size + 1][i][0] = (x[this.size][i][0] + x[this.size + 1][i][1]) / 2.0f;
-            x[0][i][this.size + 1] = (x[1][i][this.size + 1] + x[0][i][this.size]) / 2.0f;
-            x[this.size + 1][i][this.size + 1] = (x[this.size][i][this.size + 1] + x[this.size + 1][i][this.size])
-                    / 2.0f;
-        }
-
         // check each corner
         x[0][0][0] = (x[1][0][0] + x[0][1][0] + x[0][0][1]) / 3.0f;
         x[0][0][this.size + 1] = (x[1][0][this.size + 1] + x[0][1][this.size + 1] + x[0][0][this.size]) / 3.0f;
         x[0][this.size + 1][0] = (x[1][this.size + 1][0] + x[0][this.size][0] + x[0][this.size + 1][1]) / 3.0f;
-        x[0][this.size + 1][this.size + 1] = (x[1][this.size + 1][this.size + 1] = x[0][this.size][this.size + 1]
-                + x[0][this.size + 1][this.size]) / 3.0f;
+        x[0][this.size + 1][this.size + 1] = (x[1][this.size + 1][this.size + 1]
+                + x[0][this.size][this.size + 1] + x[0][this.size + 1][this.size]) / 3.0f;
         x[this.size + 1][0][0] = (x[this.size][0][0] + x[this.size + 1][1][0] + x[this.size + 1][0][1]) / 3.0f;
         x[this.size + 1][0][this.size + 1] = (x[this.size][0][this.size + 1] + x[this.size + 1][1][this.size + 1]
                 + x[this.size + 1][0][this.size]) / 3.0f;

@@ -4,14 +4,6 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.TransparencyAttributes;
 
-/**
- *
- */
-
-/**
- * @author Kaito
- *
- */
 public class Starter implements Runnable
 {
     // solver variables
@@ -95,13 +87,20 @@ public class Starter implements Runnable
                     if (temp > 0)
                     {
                         float tVal = (1.0f - temp);
-                        if (tVal < 0) tVal = 0;
-                        this.ta[(x + this.multiple - 1) / this.multiple - 1][(y + this.multiple - 1) / this.multiple
-                                - 1][(z + this.multiple - 1) / this.multiple - 1].setTransparency(tVal);
+                        if (tVal < 0)
+                        {
+                            tVal = 0;
+                        }
+                        this.ta[(x + this.multiple - 1) / this.multiple - 1][(y + this.multiple - 1)
+                                / this.multiple - 1][(z + this.multiple - 1) / this.multiple - 1]
+                                        .setTransparency(tVal);
                     }
                     else
-                        this.ta[(x + this.multiple - 1) / this.multiple - 1][(y + this.multiple - 1) / this.multiple
-                                - 1][(z + this.multiple - 1) / this.multiple - 1].setTransparency(1);
+                    {
+                        this.ta[(x + this.multiple - 1) / this.multiple - 1][(y + this.multiple - 1)
+                                / this.multiple - 1][(z + this.multiple - 1) / this.multiple - 1]
+                                        .setTransparency(1);
+                    }
                 }
             }
         }
@@ -125,12 +124,30 @@ public class Starter implements Runnable
     public void updateLocation(final boolean drag, int x, int y, int z, final int xOld, final int yOld, final int zOld)
     {
         // set boundries
-        if (x > this.size) x = this.size;
-        if (x < 1) x = 1;
-        if (y > this.size) y = this.size;
-        if (y < 1) y = 1;
-        if (z > this.size) z = this.size;
-        if (z < 1) z = 1;
+        if (x > this.size)
+        {
+            x = this.size;
+        }
+        if (x < 1)
+        {
+            x = 1;
+        }
+        if (y > this.size)
+        {
+            y = this.size;
+        }
+        if (y < 1)
+        {
+            y = 1;
+        }
+        if (z > this.size)
+        {
+            z = this.size;
+        }
+        if (z < 1)
+        {
+            z = 1;
+        }
 
         if (drag == true)
         {
@@ -139,7 +156,9 @@ public class Starter implements Runnable
             this.fs.wOld[x * this.multiple][y * this.multiple][z * this.multiple] = (z - zOld) * 50 * this.multiple;
         }
         else
+        {
             this.fs.dOld[x * this.multiple][y * this.multiple][z * this.multiple] = 100;
+        }
     }
 
     public void reset()
@@ -192,15 +211,27 @@ public class Starter implements Runnable
             for (int y = 1; y <= this.size; y++)
             {
                 scaled = input[x][y][this.size / 2] * 10000;
-                if (scaled > 99) scaled = 99;
-                if (scaled < -99) scaled = -99;
+                if (scaled > 99)
+                {
+                    scaled = 99;
+                }
+                if (scaled < -99)
+                {
+                    scaled = -99;
+                }
 
                 if (scaled > -0.9 && scaled < 0.9)
+                {
                     System.out.print("... ");
+                }
                 else if (scaled < 0)
+                {
                     System.out.print(formatter.format(scaled) + " ");
+                }
                 else
+                {
                     System.out.print("+" + formatter.format(scaled) + " ");
+                }
             }
             System.out.println();
         }

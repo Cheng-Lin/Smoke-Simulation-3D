@@ -1,0 +1,80 @@
+Visual Simulation of Smoke
+
+java -cp .:../lib/ext/* -Djava.library.path=$LD_LIBRARY_PATH:../lib/amd64/ SmokeSimulation3D
+
+The Model
++ Stable for any choice of the time step
+    - Smoke's velocity is modeled with the incompressible Euler equations
+    - These equations are solved using a semi-Lagrangian integration scheme followed by a pressure-Poisson equation
++ Reduce the numerical dissipation inherent in semi-Lagrangian schemes
+    - Achieved using 'vorticity confinement'
+    - Injects the energy lost due to numerical dissipation back into fluid using a forcing term
+        > Designed specifically to increase the velocity of the flow
+        > Keeps the smoke alive over time
+    - Consistent with Euler's equation in which is disappears as the number of grid cells is increased
+    * Forcing term needs to be kept below certain threshold to keep the model stable
++ Increase the quality of the flows
+    - With a higher order interpolation technique
+    - Especially effective when moving densities and temperatures through the velocity field
+
+The Equations of Fluid Flow
++ Modeling gases as inviscid, incompressible, constant density fluids
+    ~ The effects of viscosity are negligible in gases especially on coarse grids where numerical dissipation dominates physical viscosity and molecular diffusion
+    ~ When the smoke's velocity is well below the speed of sound the compressibility effects are negligible as well, and the assumption of incompressibility greatly simplifies the numerical methods
+    - the equations that model the smoke's velocity U = (u, v, w)
+        > Del dot U = 0 (Conservation of mass) - <1>
+        > dU/dt = -(U dot Del)U - Gradient of p + f (Conservation of momentum) - <2>
+            * p is the pressure of the gas
+            * f accounts for external forces
+            * -(U dot Del) can be solved using a semi-Lagrangian method
+        > Constant density of the fluid is arbitrarily set to one
+    - Intermediate velocity field U*
+        > Can be computed by solving equation 2 over a time step dt without the pressure term
+            * (U* - U)/dt = -(U dot Del)U + f
+        > We can force this field to be incompressible using a projection method
+            * Equivalent to computing the pressure from the following Poisson equation
+                # Square Gradient of p = 1/dt * Del dot U*
+                    @ Solved using iterative solver
+            * With pure Neumann boundary condition
+                # dp/dn = 0 at a boundary point with normal n
+            * The intermediate velocity field is then made incompressible by subtracting the gradient of the pressure from it
+                # U = U* - dt * gradient of p
+    - Assumed that temperature T and smoke's density D simply moved (advected) along the smoke's velocity
+        > dT/dt = -(u del Dot)T
+        > dD/dt = -(u del Dot)D
+    - Both temperature and density affect the fluid's velocity
+        * Heavy smoke tends to fall downwards due to gravity
+        * Hot gases tend to rise due to buoyancy
+        > f_buoy = -aDz + B(T - T_amb)z
+            * z = (0, 0, 1) - points in the upward vertical direction
+            * T_amb is the ambient temperature of the air
+            * When D = 0 and T = T_amb, this force is zero
+
+Vorticity Confinement
++ In incompressible flow, the vorticity comes from the following, which provides small scale structure
+    > w = curl of U
++ First normalized vorticity location vectors that point from lower vorticity concentrations to higher vorticity concentration are computed as follows
+    > N = (Gradient of Euclidean length of w)/(Euclidean length of (Gradient of Euclidean length of w))
++ Then the magnitude and direction of the paddle wheel force (each small piece is trying to spin the flow in a particular direction) is computed as follows
+    > f_conf = epsilon * h * (N x W)
+        * epsilon > 0 is used to control the amount of small scale detail added back into the flow field
+        * Dependence on the spatial discretization h guarantees that as the mesh is refined the physically correct solution is still obtained
+
+Implementation
++ Computational domain is diced up into identical voxels
+    - The temperature, the smoke's density and the external forces are defined at the center of each voxel
+    - The velocity is defined on the appropriate voxel faces
+    - Density at boundary voxels is equal to the density of the closest unoccupied voxel
+    - Requires two voxel grids for all physical quantities
+        > Simulation is advanced by updating one grid from the other over a fixed time step dt
+        > At the end of each time step, the two grid is swapped
+    1. Update the velocity components of the fluid
+        a. Add the force fields to the velocity grid
+            - Add the force fields to the velocity grid (user supplied fields, buoyancy force, confinement force)
+            - Done simply by multiplying each force by the time step and adding it to the velocity
+        b. Solve for the advection term using a semi-Lagrangian scheme
+        c. Force the velocity field to conserve mass (subtract the gradient of pressure from the velocity)
+            - Involves the solution of a Poisson equation for the pressure
+            - Imposing free Neumann boundary conditions at the occupied voxels by setting the normal pressure gradient equal to zero at the occupied boundary faces
+            - Linear solver is the conjugate gradient method
+    2. Advect both the temperature and the smoke's density using semi-Lagrangian scheme
