@@ -222,13 +222,13 @@ public class FluidSolver3D
         // swapping arrays for economical mem use
         // and calculating diffusion in velocity.
         this.swapU();
-        this.diffuse(0, this.u, this.uOld, this.visc);
+        this.diffuse(1, this.u, this.uOld, this.visc);
 
         this.swapV();
-        this.diffuse(0, this.v, this.vOld, this.visc);
+        this.diffuse(2, this.v, this.vOld, this.visc);
 
         this.swapW();
-        this.diffuse(0, this.w, this.wOld, this.visc);
+        this.diffuse(3, this.w, this.wOld, this.visc);
 
         // we create an incompressible field
         // for more effective advection.
@@ -321,7 +321,6 @@ public class FluidSolver3D
      * @param dv
      *            The y component of the velocity field.
      **/
-
     private void advect(final int b, final float[][][] d, final float[][][] d0, final float[][][] du,
             final float[][][] dv, final float[][][] dw)
     {
@@ -350,7 +349,6 @@ public class FluidSolver3D
                     {
                         x = 0.5f;
                     }
-
                     i0 = (int)x;
                     i1 = i0 + 1;
 
@@ -362,7 +360,6 @@ public class FluidSolver3D
                     {
                         y = 0.5f;
                     }
-
                     j0 = (int)y;
                     j1 = j0 + 1;
 
@@ -374,7 +371,6 @@ public class FluidSolver3D
                     {
                         z = 0.5f;
                     }
-
                     k0 = (int)z;
                     k1 = k0 + 1;
 
@@ -415,7 +411,7 @@ public class FluidSolver3D
     private void diffuse(final int b, final float[][][] c, final float[][][] c0, final float diff)
     {
         final float a = this.dt * diff * this.size * this.size * this.size;
-        this.linearSolver(b, c, c0, a, 1 + 9 * a);
+        this.linearSolver(b, c, c0, a, 1 + 6 * a);
     }
 
     /**
@@ -442,7 +438,6 @@ public class FluidSolver3D
      *            field.
      *
      **/
-
     void project(final float[][][] x, final float[][][] y, final float[][][] z, final float[][][] p,
             final float[][][] div)
     {
@@ -452,8 +447,8 @@ public class FluidSolver3D
             {
                 for (int k = 1; k <= this.size; k++)
                 {
-                    div[i][j][k] = (x[i + 1][j][k] - x[i - 1][j][k] + y[i][j + 1][k] - y[i][j - 1][k] + z[i][j][k + 1]
-                            - z[i][j][k - 1]) * -0.5f / this.size;
+                    div[i][j][k] = (x[i + 1][j][k] - x[i - 1][j][k] + y[i][j + 1][k]
+                            - y[i][j - 1][k] + z[i][j][k + 1] - z[i][j][k - 1]) / -3.0f / this.size;
                     p[i][j][k] = 0;
                 }
             }
@@ -463,43 +458,6 @@ public class FluidSolver3D
         this.setBoundry(0, p);
 
         this.linearSolver(0, p, div, 1, 6);
-        // for (int n = 0; n < 20; n++)
-        // {
-        // for (int i = 1; i <= size; i++)
-        // {
-        // for (int j = 1; j <= size; j++)
-        // {
-        // for (int k = 1; k <= size; k++)
-        // {
-        // //Method 1:
-        // //using average
-        // p[i][j][k] = ((p[i - 1][j][k] + p[i + 1][j][k]
-        // + p[i][j - 1][k] + p[i][j + 1][k]
-        // + p[i][j][k - 1] + p[i][j][k + 1]) / 6.0f
-        // + div[i][j][k]) / 2.0f;
-        // //Method 2:
-        // //solve for each face
-        // float xy = ((p[i - 1][j][k] + p[i + 1][j][k]
-        // + p[i][j - 1][k] + p[i][j + 1][k])
-        // + div[i][j][k]) / 6.0f;
-        // float xz = ((p[i - 1][j][k] + p[i + 1][j][k]
-        // + p[i][j][k - 1] + p[i][j][k - 1])
-        // + div[i][j][k]) / 6.0f;
-        // float yz = ((p[i][j - 1][k] + p[i][j + 1][k]
-        // + p[i][j][k - 1] + p[i][j][k + 1])
-        // + div[i][j][k]) / 6.0f;
-        // //Method 2 No.1
-        // //using average
-        // p[i][j][k] = (xy + xz + yz) / 3.0f;
-        // //Method 2 No.2
-        // //combine xy, xz, yz using sqrt(xy ^ 2 + xz ^ 2 + yz ^ 2);
-        // p[i][j][k] = (float) Math.sqrt(xy * xy + xz * xz + yz * yz)
-        // + 0.000001f;
-        // }
-        // }
-        // }
-        // setBoundry(0, p);
-        // }
 
         for (int i = 1; i <= this.size; i++)
         {
