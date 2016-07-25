@@ -1,6 +1,10 @@
 Visual Simulation of Smoke
 
-java -cp .:../lib/ext/* -Djava.library.path=$LD_LIBRARY_PATH:../lib/amd64/ SmokeSimulation3D
+java -cp bin:lib/ext/* -Djava.library.path=$LD_LIBRARY_PATH:lib/amd64/ SmokeSimulation3D
+
+https://github.com/erich666/jgt-code/blob/master/Volume_06/Number_2/Stam2001/solver.c
+https://github.com/erich666/jgt-code/blob/master/Volume_06/Number_2/Stam2001/solver03.c
+https://github.com/BlainMaguire/3dfluid/blob/master/solver3d.c
 
 The Model
 + Stable for any choice of the time step

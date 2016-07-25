@@ -153,8 +153,9 @@ public class FluidSolver3D
     {
         float dw_dx, dw_dy, dw_dz;
         float length;
-        float v;
-        final float epsilon = 3f;
+        final float v;
+        final float epsilon = 1f;
+        final float h = 1f;
 
         // Calculate magnitude of curl(u,v,w) for each cell. (|w|)
         for (int x = 1; x <= this.size; x++)
@@ -188,12 +189,13 @@ public class FluidSolver3D
                     dw_dy /= length;
                     dw_dz /= length;
 
-                    v = this.curl(x, y, z);
+                    // Will update the global variable i, j, k ans set them as w
+                    this.curl(x, y, z);
 
                     // N x w
-                    Fvc_x[x][y][z] = (dw_dy * this.k - dw_dz * this.j) * epsilon; // a2b3 - a3b2
-                    Fvc_y[x][y][z] = -(dw_dx * this.k - dw_dz * this.i) * epsilon; // a3b1 - a1b3
-                    Fvc_z[x][y][z] = (dw_dx * this.j - dw_dy * this.i) * epsilon; // a1b2 - a2b1
+                    Fvc_x[x][y][z] = (dw_dy * this.k - dw_dz * this.j) * epsilon * h; // a2b3-a3b2
+                    Fvc_y[x][y][z] = -(dw_dx * this.k - dw_dz * this.i) * epsilon * h; // a3b1-a1b3
+                    Fvc_z[x][y][z] = (dw_dx * this.j - dw_dy * this.i) * epsilon * h; // a1b2-a2b1
                 }
             }
         }
